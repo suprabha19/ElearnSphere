@@ -108,23 +108,23 @@ export class DatabaseStorage implements IStorage {
 
   // Course operations
   async getCourses(filters?: { category?: string; search?: string; instructorId?: string }): Promise<Course[]> {
-    let query = db.select().from(courses).where(eq(courses.status, 'published'));
+    const conditions = [eq(courses.status, 'published')];
     
     if (filters?.category) {
-      query = query.where(eq(courses.category, filters.category));
+      conditions.push(eq(courses.category, filters.category));
     }
     
     if (filters?.search) {
-      query = query.where(
+      conditions.push(
         sql`${courses.title} ILIKE ${`%${filters.search}%`} OR ${courses.description} ILIKE ${`%${filters.search}%`}`
       );
     }
     
     if (filters?.instructorId) {
-      query = query.where(eq(courses.instructorId, filters.instructorId));
+      conditions.push(eq(courses.instructorId, filters.instructorId));
     }
     
-    return await query.orderBy(desc(courses.createdAt));
+    return await db.select().from(courses).where(and(...conditions)).orderBy(desc(courses.createdAt));
   }
 
   async getCourse(id: string): Promise<Course | undefined> {
@@ -165,19 +165,72 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getStudentEnrollments(studentId: string): Promise<(Enrollment & { course: Course })[]> {
-    return await db
-      .select()
+    const results = await db
+      .select({
+        // Enrollment fields
+        id: enrollments.id,
+        studentId: enrollments.studentId,
+        courseId: enrollments.courseId,
+        progress: enrollments.progress,
+        completedAt: enrollments.completedAt,
+        enrolledAt: enrollments.enrolledAt,
+        // Course fields
+        course: {
+          id: courses.id,
+          title: courses.title,
+          description: courses.description,
+          shortDescription: courses.shortDescription,
+          category: courses.category,
+          price: courses.price,
+          instructorId: courses.instructorId,
+          thumbnailUrl: courses.thumbnailUrl,
+          videoUrl: courses.videoUrl,
+          status: courses.status,
+          lessonsCount: courses.lessonsCount,
+          duration: courses.duration,
+          difficulty: courses.difficulty,
+          tags: courses.tags,
+          createdAt: courses.createdAt,
+          updatedAt: courses.updatedAt,
+        }
+      })
       .from(enrollments)
       .innerJoin(courses, eq(enrollments.courseId, courses.id))
       .where(eq(enrollments.studentId, studentId));
+    
+    return results as (Enrollment & { course: Course })[];
   }
 
   async getEnrollmentsByCourse(courseId: string): Promise<(Enrollment & { student: User })[]> {
-    return await db
-      .select()
+    const results = await db
+      .select({
+        // Enrollment fields
+        id: enrollments.id,
+        studentId: enrollments.studentId,
+        courseId: enrollments.courseId,
+        progress: enrollments.progress,
+        completedAt: enrollments.completedAt,
+        enrolledAt: enrollments.enrolledAt,
+        // User fields
+        student: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          role: users.role,
+          isVerified: users.isVerified,
+          twoFactorEnabled: users.twoFactorEnabled,
+          backupCodes: users.backupCodes,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
       .from(enrollments)
       .innerJoin(users, eq(enrollments.studentId, users.id))
       .where(eq(enrollments.courseId, courseId));
+    
+    return results as (Enrollment & { student: User })[];
   }
 
   async updateProgress(enrollmentId: string, progress: number): Promise<Enrollment> {
@@ -259,11 +312,38 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCartItems(studentId: string): Promise<(CartItem & { course: Course })[]> {
-    return await db
-      .select()
+    const results = await db
+      .select({
+        // CartItem fields
+        id: cartItems.id,
+        studentId: cartItems.studentId,
+        courseId: cartItems.courseId,
+        addedAt: cartItems.addedAt,
+        // Course fields
+        course: {
+          id: courses.id,
+          title: courses.title,
+          description: courses.description,
+          shortDescription: courses.shortDescription,
+          category: courses.category,
+          price: courses.price,
+          instructorId: courses.instructorId,
+          thumbnailUrl: courses.thumbnailUrl,
+          videoUrl: courses.videoUrl,
+          status: courses.status,
+          lessonsCount: courses.lessonsCount,
+          duration: courses.duration,
+          difficulty: courses.difficulty,
+          tags: courses.tags,
+          createdAt: courses.createdAt,
+          updatedAt: courses.updatedAt,
+        }
+      })
       .from(cartItems)
       .innerJoin(courses, eq(cartItems.courseId, courses.id))
       .where(eq(cartItems.studentId, studentId));
+    
+    return results as (CartItem & { course: Course })[];
   }
 
   async removeFromCart(studentId: string, courseId: string): Promise<void> {
@@ -378,12 +458,21 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Find courses in similar categories (DFS-like traversal)
+    const validCategories = categories.filter(cat => cat !== null) as string[];
+    if (validCategories.length === 0) {
+      return await db
+        .select()
+        .from(courses)
+        .where(eq(courses.status, 'published'))
+        .limit(3);
+    }
+    
     return await db
       .select()
       .from(courses)
       .where(and(
         eq(courses.status, 'published'),
-        inArray(courses.category, categories)
+        inArray(courses.category, validCategories)
       ))
       .limit(3);
   }
