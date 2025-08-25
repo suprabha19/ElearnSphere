@@ -1,0 +1,203 @@
+/* Single Course Page Styles */
+.single-course-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+/* Header Section */
+.course-header {
+  margin-bottom: 40px;
+}
+
+.breadcrumb {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.breadcrumb a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.course-title {
+  font-size: 2.2rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.course-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.course-meta span {
+  display: flex;
+  align-items: center;
+}
+
+/* Main Content Layout */
+.course-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+/* Left Column Styles */
+.course-thumbnail {
+  margin-bottom: 30px;
+}
+
+.course-thumbnail img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.course-description, .course-syllabus {
+  margin-bottom: 30px;
+}
+
+.course-description h2, .course-syllabus h2 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.course-syllabus ul {
+  list-style: none;
+  padding: 0;
+}
+
+.course-syllabus li {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  position: relative;
+  padding-left: 25px;
+}
+
+.course-syllabus li:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #3498db;
+}
+
+/* Right Column Styles */
+.course-enrollment {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 8px;
+  position: sticky;
+  top: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.enroll-btn, .wishlist-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.enroll-btn {
+  background: #2ecc71;
+  color: white;
+}
+
+.enroll-btn:hover {
+  background: #27ae60;
+}
+
+.wishlist-btn {
+  background: #3498db;
+  color: white;
+}
+
+.wishlist-btn:hover {
+  background: #2980b9;
+}
+
+.course-features {
+  margin-top: 25px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.feature .icon {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.course-requirements {
+  margin-top: 30px;
+}
+
+.course-requirements h3 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.course-requirements ul {
+  list-style: none;
+  padding: 0;
+}
+
+.course-requirements li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .course-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .course-enrollment {
+    position: static;
+  }
+  
+}
+
+@media (max-width: 480px) {
+  .course-title {
+    font-size: 1.8rem;
+  }
+  
+  .course-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
