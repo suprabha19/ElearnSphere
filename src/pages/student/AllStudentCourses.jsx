@@ -21,10 +21,8 @@ const AllStudentCourses = () => {
   }, []);
 
   return (
-    <div className="p-6 ml-">
-      <h2 className="text-3xl font-bold mb-6 mt-15 text-gray-800">
-        All Courses
-      </h2>
+    <div className="p-6">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">All Courses</h2>
       <div className="space-y-6">
         {courses.map((c) => (
           <div
@@ -51,17 +49,17 @@ const AllStudentCourses = () => {
 
               <div className="flex flex-wrap gap-4">
                 <Link
-                  to={`/courses/${c._id}`}
-                  className="px-4 py-2 bg-[#e44d30] text-white text-sm font-medium rounded-lg shadow hover:bg-[#ae4530] transition"
+                  to={`/student-dashboard/course/${c._id}`}
+                  className="px-4 py-2 bg-[#e44d30] text-white text-sm font-medium rounded-lg shadow hover:bg-[#ce472c] transition"
                 >
                   View Details
                 </Link>
-                <Link
-                  to={`/signup`}
-                  className="px-4 py-2 bg-[#e44d30] text-white text-sm font-medium rounded-lg shadow hover:bg-[#ae4530] transition"
+                <button
+                  onClick={() => handleEnroll(c._id)}
+                  className="px-4 py-2 bg-[#e44d30] text-white text-sm font-medium rounded-lg shadow hover:bg-[#ce472c] transition"
                 >
                   Enroll
-                </Link>
+                </button>
               </div>
             </div>
           </div>

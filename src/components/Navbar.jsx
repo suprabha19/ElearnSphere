@@ -3,32 +3,6 @@ import { Link } from "react-router-dom";
 import { FaBars, FaTimes, FaCaretDown } from "react-icons/fa";
 import SearchBar from "./SearchBar";
 
-const dropdowns = {
-  Knowledgebase: ["AI-Powered Knowledgebase", "Knowledgebase Grid"],
-  Courses: ["All Courses", "Single Course"],
-  Shop: ["Products Section", "Single Product"],
-  Blog: ["Blog Grid", "Blog Single"],
-  Pages: ["About Us", "Services", "Pricing", "FAQ"],
-};
-
-const getPath = (label) => {
-  const map = {
-    "AI-Powered Knowledgebase": "/knowledgebase",
-    "Knowledgebase Grid": "/grid",
-    "All Courses": "/allcourses",
-    "Single Course": "/singlecourse",
-    "Products Section": "/products",
-    "Single Product": "/single-product",
-    "Blog Grid": "/blogs",
-    "Blog Single": "/blog/1",
-    "About Us": "/about-us",
-    Services: "/services",
-    Pricing: "/pricing",
-    FAQ: "/faq",
-  };
-  return map[label] || "/";
-};
-
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
@@ -79,42 +53,20 @@ const Navbar = () => {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center space-x-4" ref={dropdownRef}>
+        <div className="flex items-center space-x-4">
           {/* Explore */}
           <div className="relative">
-            <button
-              onClick={toggleExplore}
+            <Link
+              to="/allcourses"
               className="flex items-center text-gray-700 font-medium hover:text-[#e44d30]"
             >
-              Explore <FaCaretDown className="ml-1" />
-            </button>
-
-            {exploreOpen && (
-              <div className="fixed left-0 top-[70px] w-full bg-[#fcf8f3] shadow-lg py-6 z-50">
-                <div className="max-w-7xl mx-auto grid grid-cols-5 gap-8 px-6">
-                  {Object.entries(dropdowns).map(([category, items], idx) => (
-                    <div key={idx}>
-                      <p className="font-semibold text-gray-900 mb-2">
-                        {category}
-                      </p>
-                      <ul className="space-y-1 text-gray-600">
-                        {items.map((item, i) => (
-                          <li key={i}>
-                            <Link
-                              to={getPath(item)}
-                              className="block hover:text-[#e44d30] text-sm"
-                              onClick={() => setExploreOpen(false)}
-                            >
-                              {item}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              <button
+                onClick={toggleExplore}
+                className="flex items-center text-gray-700 font-medium hover:text-[#e44d30]"
+              >
+                Explore <FaCaretDown className="ml-1" />
+              </button>
+            </Link>
           </div>
 
           {/* Auth Links */}

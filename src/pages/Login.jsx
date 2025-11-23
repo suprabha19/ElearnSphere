@@ -25,14 +25,15 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/auth/login",
+        "http://localhost:5000/api/auth/login",
         loginData
       );
-      const { token, role, instructorStatus } = res.data;
+      const { token, role, user } = res.data;
 
       // Store token & role
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
+      localStorage.setItem("user", JSON.stringify(user));
 
       // Check instructor status if applicable
       if (role === "INSTRUCTOR" && instructorStatus !== "APPROVED") {
@@ -45,18 +46,19 @@ const Login = () => {
       setSuccess(true);
 
       // Navigate based on role
-      setTimeout(() => {
-        switch (role) {
-          case "ADMIN":
-            navigate("/admin-dashboard");
-            break;
-          case "INSTRUCTOR":
-            navigate("/instructor-dashboard");
-            break;
-          default:
-            navigate("/student-dashboard");
-        }
-      }, 100);
+      switch (user.role) {
+        case "STUDENT":
+          navigate("/student-dashboard");
+          break;
+        case "INSTRUCTOR":
+          navigate("/instructor-dashboard");
+          break;
+        case "ADMIN":
+          navigate("/admin-dashboard");
+          break;
+        default:
+          navigate("/"); // fallback
+      }
     } catch (err) {
       console.error("❌ Login Error:", err.response?.data || err.message);
       setError(
@@ -139,14 +141,14 @@ const Login = () => {
             </button>
           </div>
 
-          <div className="text-center pt-2">
+          {/* <div className="text-center pt-2">
             <Link
               to="/forgot-password"
               className="text-sm text-[#e44d30] hover:underline"
             >
               Forgot password?
             </Link>
-          </div>
+          </div> */}
         </form>
 
         <div className="border-t border-gray-200 mt-6 pt-4 text-sm text-center">

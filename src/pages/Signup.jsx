@@ -10,9 +10,10 @@ const Signup = () => {
     email: "",
     password: "",
     role: "STUDENT", // Default role
-    qualifications: "",
-    experience: "",
-    verificationDocument: null,
+    secretCode: "",
+    // qualifications: "",
+    // experience: "",
+    // verificationDocument: null,
   });
 
   const [error, setError] = useState("");
@@ -32,49 +33,54 @@ const Signup = () => {
     setIsSubmitting(true);
 
     // Basic validation
-    if (
-      form.role === "INSTRUCTOR" &&
-      (!form.qualifications || !form.experience || !form.verificationDocument)
-    ) {
-      setError(
-        "Instructors must provide qualifications, experience, and verification document"
-      );
-      setIsSubmitting(false);
-      return;
-    }
+    // if (
+    //   form.role === "INSTRUCTOR" &&
+    //   (!form.qualifications || !form.experience || !form.verificationDocument)
+    // ) {
+    //   setError(
+    //     "Instructors must provide qualifications, experience, and verification document"
+    //   );
+    //   setIsSubmitting(false);
+    //   return;
+    // }
 
     try {
-      const formData = new FormData();
-      formData.append("fullName", form.fullName);
-      formData.append("email", form.email);
-      formData.append("password", form.password);
-      formData.append("role", form.role);
+      const data = {
+        fullName: form.fullName,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+      };
 
-      if (form.role === "INSTRUCTOR") {
-        formData.append("qualifications", form.qualifications);
-        formData.append("experience", form.experience);
-        formData.append("verificationDocument", form.verificationDocument);
+      // Attach secretCode if role = INSTRUCTOR or ADMIN
+      if (form.role === "INSTRUCTOR" || form.role === "ADMIN") {
+        data.secretCode = form.secretCode; // 👈 add secretCode if needed
       }
+      // if (form.role === "INSTRUCTOR") {
+      //   formData.append("qualifications", form.qualifications);
+      //   formData.append("experience", form.experience);
+      //   formData.append("verificationDocument", form.verificationDocument);
+      // }
 
       const res = await axios.post(
-        "http://localhost:8080/api/auth/signup",
-        formData,
+        "http://localhost:5000/api/auth/signup",
+        form, // <--- your FormData
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", // required for files
           },
         }
       );
 
       console.log("✅ Signup Success:", res.data);
 
-      if (form.role === "INSTRUCTOR") {
-        alert(
-          "Your instructor application has been submitted for admin approval. You'll receive an email when approved."
-        );
-      } else {
-        alert("Account created successfully!");
-      }
+      // if (form.role === "INSTRUCTOR") {
+      //   alert(
+      //     "Your instructor application has been submitted for admin approval. You'll receive an email when approved."
+      //   );
+      // } else {
+      //   alert("Account created successfully!");
+      // }
 
       navigate("/login");
     } catch (err) {
@@ -164,8 +170,23 @@ const Signup = () => {
               <option value="INSTRUCTOR">Instructor</option>
             </select>
           </div>
-
+          {/* Secret Code for Instructor/Admin */}
           {form.role === "INSTRUCTOR" && (
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Secret Code:</label>
+              <input
+                type="text"
+                name="secretCode"
+                value={form.secretCode}
+                onChange={handleChange}
+                placeholder="Enter secret code"
+                className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-[#e44d30]"
+                required
+              />
+            </div>
+          )}
+
+          {/* {form.role === "INSTRUCTOR" && (
             <>
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">
@@ -230,7 +251,7 @@ const Signup = () => {
                 </div>
               </div>
             </>
-          )}
+          )} */}
 
           <button
             type="submit"
@@ -246,7 +267,7 @@ const Signup = () => {
             Already have an account?{" "}
             <span
               onClick={() => navigate("/login")}
-              className="text-blue-600 hover:underline cursor-pointer"
+              className="text-[#e44d30] hover:underline cursor-pointer"
             >
               Log in
             </span>
