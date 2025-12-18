@@ -45,6 +45,11 @@ const AllStudentCourses = () => {
               <p className="text-sm text-gray-500 mb-2">
                 Category: {c.category}
               </p>
+              {c.instructor && (
+                <p className="text-sm text-gray-500 mb-2">
+                  Instructor: {c.instructor.fullName}
+                </p>
+              )}
               <p className="text-gray-700 mb-4">{c.description}</p>
 
               <div className="flex flex-wrap gap-4">

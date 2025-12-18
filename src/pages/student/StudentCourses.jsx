@@ -53,6 +53,11 @@ const StudentCourses = () => {
               <p className="text-sm text-gray-500 mb-2">
                 Category: {course.category}
               </p>
+              {course.instructor && (
+                <p className="text-sm text-gray-500 mb-2">
+                  Instructor: {course.instructor.fullName}
+                </p>
+              )}
               <p className="text-gray-700 mb-4">{course.description}</p>
               <Link
                 to={`/student-dashboard/course/${course._id}`}

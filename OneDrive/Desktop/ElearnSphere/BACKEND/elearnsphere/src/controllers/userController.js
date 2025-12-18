@@ -4,7 +4,10 @@ import Course from "../models/Course.js";
 // Get courses the student is enrolled in
 export const getEnrolledCourses = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("enrolledCourses");
+    const user = await User.findById(req.user.id).populate({
+      path: "enrolledCourses",
+      populate: { path: "instructor", select: "fullName email" }
+    });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     res.json(user.enrolledCourses);

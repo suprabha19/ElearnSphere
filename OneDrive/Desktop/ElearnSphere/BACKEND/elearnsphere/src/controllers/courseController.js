@@ -221,7 +221,7 @@ export const deleteCourse = async (req, res) => {
 // Get all courses
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find(); // get all courses from DB
+    const courses = await Course.find().populate("instructor", "fullName email"); // get all courses from DB with instructor details
     res.status(200).json(courses);
   } catch (error) {
     console.error(error);
