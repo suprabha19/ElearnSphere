@@ -76,10 +76,17 @@ const CourseDetails = () => {
           <p className="text-gray-600 text-sm mb-4">
             Category: <span className="font-medium">{course.category}</span>
           </p>
-          {/* <p className="text-gray-600 text-sm mb-4">
-            Instructor:
-            <span className="font-medium">{course.instructorName}</span>
-          </p> */}
+          {course.instructor && (
+            <p className="text-gray-600 text-sm mb-4">
+              Instructor:{" "}
+              <span className="font-medium">{course.instructor.fullName}</span>
+              {course.instructor.email && (
+                <span className="text-gray-500 text-xs ml-2">
+                  ({course.instructor.email})
+                </span>
+              )}
+            </p>
+          )}
           <p className="text-gray-800 leading-relaxed">{course.description}</p>
 
           {/* Buttons */}

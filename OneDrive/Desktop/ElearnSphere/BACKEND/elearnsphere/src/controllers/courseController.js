@@ -48,9 +48,9 @@ export const getCourses = async (req, res) => {
 
     let courses;
     if (req.user.role === "INSTRUCTOR") {
-      courses = await Course.find({ instructor: req.user.id });
+      courses = await Course.find({ instructor: req.user.id }).populate("instructor", "fullName email");
     } else {
-      courses = await Course.find();
+      courses = await Course.find().populate("instructor", "fullName email");
     }
 
     console.log("Found courses:", courses.length);
@@ -221,7 +221,7 @@ export const deleteCourse = async (req, res) => {
 // Get all courses
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find(); // get all courses from DB
+    const courses = await Course.find().populate("instructor", "fullName email"); // get all courses with instructor details
     res.status(200).json(courses);
   } catch (error) {
     console.error(error);
@@ -290,8 +290,9 @@ export const searchCourses = async (req, res) => {
           { category: { $regex: query, $options: "i" } }
         ]
       },
-      { title: 1, description: 1, category: 1, popularity: 1 }
+      { title: 1, description: 1, category: 1, popularity: 1, instructor: 1 }
     )
+      .populate("instructor", "fullName email")
       .sort({ popularity: -1 }) // most popular first
       .limit(8);
 
