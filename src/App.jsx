@@ -25,6 +25,9 @@ import InstructorHome from "./pages/instructor/InstructorHome";
 import EditCourse from "./pages/instructor/EditCourse";
 import CourseMaterials from "./pages/instructor/CourseMaterials";
 import AddCourse from "./pages/instructor/AddCourse";
+import InstructorQuizzes from "./pages/instructor/InstructorQuizzes";
+import AddQuiz from "./pages/instructor/AddQuiz";
+import EditQuiz from "./pages/instructor/EditQuiz";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentHome from "./pages/student/StudentHome";
@@ -33,6 +36,9 @@ import StudentCourses from "./pages/student/StudentCourses";
 import StudentProfile from "./pages/student/StudentProfile";
 import AllStudentCourses from "./pages/student/AllStudentCourses";
 import CourseDetails from "./pages/student/CourseDetails";
+import StudentQuizzes from "./pages/student/StudentQuizzes";
+import AttemptQuiz from "./pages/student/AttemptQuiz";
+import QuizResult from "./pages/student/QuizResult";
 
 function App() {
   return (
@@ -69,6 +75,9 @@ function App() {
           <Route path="courses" element={<StudentCourses />} />
           <Route path="profile" element={<StudentProfile />} />
           <Route path="course/:id" element={<CourseDetails />} />
+          <Route path="quizzes" element={<StudentQuizzes />} />
+          <Route path="quiz/:id/attempt" element={<AttemptQuiz />} />
+          <Route path="quiz-result/:id" element={<QuizResult />} />
         </Route>
 
         {/* Instructor Dashboard Routes */}
@@ -86,6 +95,9 @@ function App() {
           <Route path="add-course" element={<AddCourse />} />
           <Route path="courses/:id/edit" element={<EditCourse />} />
           <Route path="courses/:id/materials" element={<CourseMaterials />} />
+          <Route path="quizzes" element={<InstructorQuizzes />} />
+          <Route path="add-quiz" element={<AddQuiz />} />
+          <Route path="quizzes/:id/edit" element={<EditQuiz />} />
         </Route>
 
         {/* <Route

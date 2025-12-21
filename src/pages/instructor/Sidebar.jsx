@@ -1,7 +1,7 @@
 // src/pages/instructor/Sidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, PlusCircle, LogOut, Home } from "lucide-react"; // ✅ added Home icon
+import { BookOpen, PlusCircle, LogOut, Home, FileQuestion } from "lucide-react"; // ✅ added Home icon
 
 const Sidebar = () => {
   const location = useLocation();
@@ -14,6 +14,7 @@ const Sidebar = () => {
       path: "add-course",
       icon: <PlusCircle size={18} />,
     },
+    { name: "Quizzes", path: "quizzes", icon: <FileQuestion size={18} /> },
   ];
 
   const handleLogout = () => {

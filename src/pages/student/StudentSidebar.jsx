@@ -1,7 +1,7 @@
 // src/pages/student/StudentSidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, User, LogOut, Layers } from "lucide-react"; // ✅ icons
+import { BookOpen, User, LogOut, Layers, FileQuestion } from "lucide-react"; // ✅ icons
 
 const StudentSidebar = () => {
   const location = useLocation();
@@ -10,6 +10,7 @@ const StudentSidebar = () => {
     { name: "Home", path: "student-home", icon: <User size={18} /> },
     { name: "All Courses", path: "all-courses", icon: <Layers size={18} /> },
     { name: "My Courses", path: "courses", icon: <BookOpen size={18} /> },
+    { name: "Quizzes", path: "quizzes", icon: <FileQuestion size={18} /> },
   ];
 
   const handleLogout = () => {
