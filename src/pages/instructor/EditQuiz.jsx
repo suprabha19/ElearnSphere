@@ -295,13 +295,10 @@ const EditQuiz = () => {
                 <input
                   type="number"
                   value={q.points}
-                  onChange={(e) =>
-                    handleQuestionChange(
-                      qIndex,
-                      "points",
-                      parseInt(e.target.value)
-                    )
-                  }
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 1;
+                    handleQuestionChange(qIndex, "points", Math.max(1, value));
+                  }}
                   min="1"
                   className="w-32 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#e44d30] outline-none"
                 />

@@ -22,10 +22,41 @@ const AttemptQuiz = () => {
         setTimeRemaining(timeRemaining - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (timeRemaining === 0 && quiz) {
-      handleSubmit();
+    } else if (timeRemaining === 0 && quiz && !submitting) {
+      handleAutoSubmit();
     }
-  }, [timeRemaining]);
+  }, [timeRemaining, submitting]);
+
+  const handleAutoSubmit = async () => {
+    if (submitting) return; // Prevent multiple submissions
+    
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const formattedAnswers = Object.keys(answers).map((qIndex) => ({
+        questionIndex: parseInt(qIndex),
+        selectedAnswer: answers[qIndex],
+      }));
+
+      const res = await axios.post(
+        "http://localhost:5000/api/quizzes/attempt",
+        {
+          quizId: id,
+          answers: formattedAnswers,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      alert("⏰ Time's up! Quiz submitted automatically.");
+      navigate(`/student-dashboard/quiz-result/${res.data._id}`);
+    } catch (err) {
+      console.error("Failed to auto-submit quiz:", err);
+      alert("Failed to submit quiz automatically. Please try again.");
+      setSubmitting(false);
+    }
+  };
 
   const fetchQuiz = async () => {
     try {

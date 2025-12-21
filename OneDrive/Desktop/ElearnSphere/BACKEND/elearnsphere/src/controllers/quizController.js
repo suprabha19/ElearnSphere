@@ -156,6 +156,11 @@ export const submitQuizAttempt = async (req, res) => {
     // Calculate score
     let score = 0;
     const processedAnswers = answers.map((answer, index) => {
+      // Validate questionIndex is within bounds
+      if (answer.questionIndex < 0 || answer.questionIndex >= quiz.questions.length) {
+        throw new Error(`Invalid question index: ${answer.questionIndex}`);
+      }
+      
       const question = quiz.questions[answer.questionIndex];
       const isCorrect = question.correctAnswer === answer.selectedAnswer;
       const points = isCorrect ? (question.points || 1) : 0;
