@@ -48,6 +48,21 @@ const CourseDetail = () => {
               </span>
             </p>
 
+            {/* Instructor */}
+            {course.instructor && (
+              <p className="text-sm text-gray-600 mb-6">
+                Instructor:{" "}
+                <span className="font-medium text-gray-800">
+                  {course.instructor.fullName}
+                </span>
+                {course.instructor.email && (
+                  <span className="text-gray-500 text-xs ml-2">
+                    ({course.instructor.email})
+                  </span>
+                )}
+              </p>
+            )}
+
             {/* Description */}
             <p className="text-gray-700 text-lg leading-relaxed mb-6">
               {course.description}
