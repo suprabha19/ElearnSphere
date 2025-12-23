@@ -9,7 +9,7 @@ const router = express.Router();
 // Multer configuration for profile picture upload
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, "uploads/profiles/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
@@ -79,7 +79,7 @@ router.post("/profile/picture", protect, upload.single("profilePicture"), async 
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.profilePicture = `/uploads/${req.file.filename}`;
+    user.profilePicture = `/uploads/profiles/${req.file.filename}`;
     await user.save();
 
     res.json({ profilePicture: user.profilePicture });

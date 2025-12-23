@@ -37,8 +37,9 @@ const DashboardTopbar = () => {
 
     const timer = setTimeout(async () => {
       try {
+        const encodedQuery = encodeURIComponent(query);
         const { data } = await axios.get(
-          `http://localhost:5000/api/search?query=${query}`
+          `http://localhost:5000/api/search?query=${encodedQuery}`
         );
         setResults(data);
       } catch (err) {
@@ -69,7 +70,7 @@ const DashboardTopbar = () => {
     const role = userProfile?.role?.toLowerCase();
     if (role === "student") {
       navigate(`/student-dashboard/course/${course._id}`);
-    } else {
+    } else if (role === "instructor") {
       navigate(`/courses/${course._id}`);
     }
   };
