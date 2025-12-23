@@ -2,9 +2,21 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import User from "../models/User.js";
-import { upload } from "../../index.js";
+import multer from "multer";
 
 const router = express.Router();
+
+// Multer configuration for profile picture upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ storage });
 
 // GET /api/users/me/enrolled-courses
 router.get("/me/enrolled-courses", protect, async (req, res) => {
