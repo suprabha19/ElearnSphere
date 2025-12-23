@@ -2,7 +2,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import StudentSidebar from "./StudentSidebar";
-// import StudentTopbar from "./StudentTopbar";
+import DashboardTopbar from "../../components/DashboardTopbar";
 
 const StudentDashboard = () => {
   return (
@@ -11,16 +11,16 @@ const StudentDashboard = () => {
       <StudentSidebar />
 
       {/* Main area */}
-      {/* <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col">
         {/* Topbar */}
-      {/* <StudentTopbar />  */}
+        <DashboardTopbar />
 
-      {/* Content area (dynamic) */}
-      <main className="flex-1 p-6 overflow-y-auto">
-        <Outlet /> {/* All child routes will render here */}
-      </main>
+        {/* Content area (dynamic) */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          <Outlet /> {/* All child routes will render here */}
+        </main>
+      </div>
     </div>
-    // </div>
   );
 };
 

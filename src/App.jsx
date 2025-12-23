@@ -39,6 +39,8 @@ import CourseDetails from "./pages/student/CourseDetails";
 import StudentQuizzes from "./pages/student/StudentQuizzes";
 import AttemptQuiz from "./pages/student/AttemptQuiz";
 import QuizResult from "./pages/student/QuizResult";
+import InstructorsList from "./pages/student/InstructorsList";
+import InstructorProfile from "./pages/instructor/InstructorProfile";
 
 function App() {
   return (
@@ -78,6 +80,7 @@ function App() {
           <Route path="quizzes" element={<StudentQuizzes />} />
           <Route path="quiz/:id/attempt" element={<AttemptQuiz />} />
           <Route path="quiz-result/:id" element={<QuizResult />} />
+          <Route path="instructors" element={<InstructorsList />} />
         </Route>
 
         {/* Instructor Dashboard Routes */}
@@ -98,6 +101,7 @@ function App() {
           <Route path="quizzes" element={<InstructorQuizzes />} />
           <Route path="add-quiz" element={<AddQuiz />} />
           <Route path="quizzes/:id/edit" element={<EditQuiz />} />
+          <Route path="profile" element={<InstructorProfile />} />
         </Route>
 
         {/* <Route
