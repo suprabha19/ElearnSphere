@@ -122,4 +122,54 @@ router.get("/instructors/:id", async (req, res) => {
   }
 });
 
+// GET /api/users/enrolled-students - Get all students enrolled in instructor's courses
+router.get("/enrolled-students", protect, async (req, res) => {
+  try {
+    // Verify user is an instructor
+    if (req.user.role !== "INSTRUCTOR") {
+      return res.status(403).json({ message: "Only instructors can access this" });
+    }
+
+    // Import Course model
+    const Course = (await import("../models/Course.js")).default;
+
+    // Find all courses by this instructor
+    const courses = await Course.find({ instructor: req.user.id })
+      .populate("students", "fullName email phone bio enrolledCourses")
+      .lean();
+
+    // Collect unique students with their enrolled courses
+    const studentMap = new Map();
+
+    courses.forEach(course => {
+      course.students.forEach(student => {
+        const studentId = student._id.toString();
+        if (!studentMap.has(studentId)) {
+          studentMap.set(studentId, {
+            _id: student._id,
+            fullName: student.fullName,
+            email: student.email,
+            phone: student.phone || "",
+            bio: student.bio || "",
+            enrolledCourses: []
+          });
+        }
+        // Add this course to the student's enrolled courses
+        studentMap.get(studentId).enrolledCourses.push({
+          _id: course._id,
+          title: course.title
+        });
+      });
+    });
+
+    // Convert map to array
+    const students = Array.from(studentMap.values());
+
+    res.json(students);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default router;

@@ -27,6 +27,7 @@ import AddCourse from "./pages/instructor/AddCourse";
 import InstructorQuizzes from "./pages/instructor/InstructorQuizzes";
 import AddQuiz from "./pages/instructor/AddQuiz";
 import EditQuiz from "./pages/instructor/EditQuiz";
+import EnrolledStudents from "./pages/instructor/EnrolledStudents";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentHome from "./pages/student/StudentHome";
@@ -100,6 +101,7 @@ function App() {
           <Route path="quizzes" element={<InstructorQuizzes />} />
           <Route path="add-quiz" element={<AddQuiz />} />
           <Route path="quizzes/:id/edit" element={<EditQuiz />} />
+          <Route path="students" element={<EnrolledStudents />} />
           <Route path="profile" element={<InstructorProfile />} />
         </Route>
 
