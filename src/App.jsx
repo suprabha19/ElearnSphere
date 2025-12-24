@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/MainLayout";
@@ -28,6 +27,7 @@ import AddCourse from "./pages/instructor/AddCourse";
 import InstructorQuizzes from "./pages/instructor/InstructorQuizzes";
 import AddQuiz from "./pages/instructor/AddQuiz";
 import EditQuiz from "./pages/instructor/EditQuiz";
+import EnrolledStudents from "./pages/instructor/EnrolledStudents";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentHome from "./pages/student/StudentHome";
@@ -39,6 +39,8 @@ import CourseDetails from "./pages/student/CourseDetails";
 import StudentQuizzes from "./pages/student/StudentQuizzes";
 import AttemptQuiz from "./pages/student/AttemptQuiz";
 import QuizResult from "./pages/student/QuizResult";
+import InstructorsList from "./pages/student/InstructorsList";
+import InstructorProfile from "./pages/instructor/InstructorProfile";
 
 function App() {
   return (
@@ -78,6 +80,7 @@ function App() {
           <Route path="quizzes" element={<StudentQuizzes />} />
           <Route path="quiz/:id/attempt" element={<AttemptQuiz />} />
           <Route path="quiz-result/:id" element={<QuizResult />} />
+          <Route path="instructors" element={<InstructorsList />} />
         </Route>
 
         {/* Instructor Dashboard Routes */}
@@ -98,6 +101,8 @@ function App() {
           <Route path="quizzes" element={<InstructorQuizzes />} />
           <Route path="add-quiz" element={<AddQuiz />} />
           <Route path="quizzes/:id/edit" element={<EditQuiz />} />
+          <Route path="students" element={<EnrolledStudents />} />
+          <Route path="profile" element={<InstructorProfile />} />
         </Route>
 
         {/* <Route

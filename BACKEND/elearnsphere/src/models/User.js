@@ -11,17 +11,16 @@ const userSchema = new mongoose.Schema(
       enum: ["STUDENT", "INSTRUCTOR", "ADMIN"],
       default: "STUDENT",
     },
-     enrolledCourses: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "Course" }
-  ],// <-- This is important
-    // qualifications: { type: String },
-    // experience: { type: Number },
-    // verificationDocument: { type: String }, // store file path or cloud URL
-    // instructorStatus: {
-    //   type: String,
-    //   enum: ["PENDING", "APPROVED", "REJECTED"],
-    //   default: "PENDING",
-    // },
+    enrolledCourses: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Course" }
+    ],
+    // Profile fields for instructors
+    bio: { type: String, default: "" },
+    qualifications: { type: String, default: "" },
+    experience: { type: String, default: "" },
+    expertise: [{ type: String }],
+    profilePicture: { type: String, default: "" },
+    phone: { type: String, default: "" },
   },
   { timestamps: true }
 );
