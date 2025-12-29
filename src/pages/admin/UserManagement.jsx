@@ -1,8 +1,9 @@
 // src/pages/admin/UserManagement.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Search, Trash2, Edit, Eye } from "lucide-react";
+import { Search, Trash2, Edit } from "lucide-react";
 import { toast } from "react-toastify";
+import API_BASE_URL from "../../config/api";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -24,7 +25,7 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
+      const res = await axios.get(`${API_BASE_URL}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
@@ -60,7 +61,7 @@ const UserManagement = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, {
+      await axios.delete(`${API_BASE_URL}/api/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("User deleted successfully");
@@ -81,7 +82,7 @@ const UserManagement = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/admin/users/${selectedUser._id}`,
+        `${API_BASE_URL}/api/admin/users/${selectedUser._id}`,
         {
           fullName: selectedUser.fullName,
           email: selectedUser.email,

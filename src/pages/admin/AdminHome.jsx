@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Users, BookOpen, Award, TrendingUp } from "lucide-react";
+import API_BASE_URL from "../../config/api";
 
 const AdminHome = () => {
   const [stats, setStats] = useState({
@@ -26,10 +27,10 @@ const AdminHome = () => {
         }
 
         const [statsRes, activitiesRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/admin/stats", {
+          axios.get(`${API_BASE_URL}/api/admin/stats`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/admin/activities", {
+          axios.get(`${API_BASE_URL}/api/admin/activities`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

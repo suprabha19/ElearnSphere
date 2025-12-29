@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Search, Trash2, Eye } from "lucide-react";
 import { toast } from "react-toastify";
+import API_BASE_URL from "../../config/api";
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState([]);
@@ -22,7 +23,7 @@ const CourseManagement = () => {
   const fetchCourses = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/courses", {
+      const res = await axios.get(`${API_BASE_URL}/api/admin/courses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCourses(res.data);
@@ -59,7 +60,7 @@ const CourseManagement = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.delete(
-        `http://localhost:5000/api/admin/courses/${courseId}`,
+        `${API_BASE_URL}/api/admin/courses/${courseId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -148,7 +149,7 @@ const CourseManagement = () => {
             >
               {course.image && (
                 <img
-                  src={`http://localhost:5000${course.image}`}
+                  src={`${API_BASE_URL}${course.image}`}
                   alt={course.title}
                   className="w-full h-48 object-cover"
                 />
