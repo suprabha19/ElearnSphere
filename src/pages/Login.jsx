@@ -161,14 +161,6 @@ const Login = () => {
               Sign up
             </Link>
           </p>
-          <div className="mt-3 pt-3 border-t border-gray-200">
-            <p className="text-gray-500 text-xs">
-              Administrators can log in here with their admin credentials.
-            </p>
-            <p className="text-gray-400 text-xs mt-1">
-              To create an admin account, sign up with role "ADMIN" using the secret code.
-            </p>
-          </div>
         </div>
       </div>
     </div>
