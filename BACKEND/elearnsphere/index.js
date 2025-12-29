@@ -13,6 +13,7 @@ import searchRoutes from "./src/routes/search.js";
 import studentRoutes from "./src/routes/studentRoutes.js";
 import recommendRoutes from "./src/routes/recommend.js";
 import quizRoutes from "./src/routes/quizRoutes.js";
+import adminRoutes from "./src/routes/adminRoutes.js";
 
 const app = express();
 dotenv.config();
@@ -41,6 +42,7 @@ app.use("/api/recommend", recommendRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/quizzes", quizRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Allow serving files in /uploads
 const __filename = fileURLToPath(import.meta.url);
