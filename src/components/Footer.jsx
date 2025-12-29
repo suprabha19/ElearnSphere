@@ -99,15 +99,6 @@ const Footer = () => {
                 Log In
               </Link>
             </li>
-            <li>
-              <Link
-                to="/admin-dashboard"
-                className="hover:text-[#e44d30] flex items-center gap-2"
-              >
-                <FaArrowUpRightFromSquare className="text-orange-600 text-xs" />
-                Admin Panel
-              </Link>
-            </li>
             {/* <Link
                 to="/blogs"
                 className="hover:text-[#e44d30] flex items-center gap-2"
