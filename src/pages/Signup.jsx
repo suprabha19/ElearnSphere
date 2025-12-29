@@ -168,10 +168,11 @@ const Signup = () => {
             >
               <option value="STUDENT">Student</option>
               <option value="INSTRUCTOR">Instructor</option>
+              <option value="ADMIN">Admin</option>
             </select>
           </div>
           {/* Secret Code for Instructor/Admin */}
-          {form.role === "INSTRUCTOR" && (
+          {(form.role === "INSTRUCTOR" || form.role === "ADMIN") && (
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">Secret Code:</label>
               <input
