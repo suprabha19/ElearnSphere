@@ -41,9 +41,11 @@ export const getAllUsers = async (req, res) => {
       query.role = role;
     }
     if (search) {
+      // Sanitize search input to prevent ReDoS
+      const sanitizedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').substring(0, 100);
       query.$or = [
-        { fullName: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
+        { fullName: { $regex: sanitizedSearch, $options: "i" } },
+        { email: { $regex: sanitizedSearch, $options: "i" } },
       ];
     }
 
@@ -135,9 +137,11 @@ export const getAllCoursesAdmin = async (req, res) => {
       query.category = category;
     }
     if (search) {
+      // Sanitize search input to prevent ReDoS
+      const sanitizedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').substring(0, 100);
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+        { title: { $regex: sanitizedSearch, $options: "i" } },
+        { description: { $regex: sanitizedSearch, $options: "i" } },
       ];
     }
 

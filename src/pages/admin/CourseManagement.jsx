@@ -46,8 +46,8 @@ const CourseManagement = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (course) =>
-          course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          course.description.toLowerCase().includes(searchTerm.toLowerCase())
+          (course.title && course.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (course.description && course.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 

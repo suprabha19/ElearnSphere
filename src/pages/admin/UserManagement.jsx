@@ -48,8 +48,8 @@ const UserManagement = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (user) =>
-          user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchTerm.toLowerCase())
+          (user.fullName && user.fullName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
