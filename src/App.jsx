@@ -42,6 +42,14 @@ import QuizResult from "./pages/student/QuizResult";
 import InstructorsList from "./pages/student/InstructorsList";
 import InstructorProfile from "./pages/instructor/InstructorProfile";
 
+// Admin pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminHome from "./pages/admin/AdminHome";
+import UserManagement from "./pages/admin/UserManagement";
+import CourseManagement from "./pages/admin/CourseManagement";
+import Analytics from "./pages/admin/Analytics";
+import Settings from "./pages/admin/Settings";
+
 function App() {
   return (
     <Router>
@@ -105,14 +113,22 @@ function App() {
           <Route path="profile" element={<InstructorProfile />} />
         </Route>
 
-        {/* <Route
+        {/* Admin Dashboard Routes */}
+        <Route
           path="/admin-dashboard"
           element={
             <ProtectedRoute allowedRoles={["ADMIN"]}>
               <AdminDashboard />
             </ProtectedRoute>
           }
-        /> */}
+        >
+          <Route index element={<AdminHome />} />
+          <Route path="home" element={<AdminHome />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="courses" element={<CourseManagement />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
       </Routes>
     </Router>
   );
