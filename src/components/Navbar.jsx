@@ -70,6 +70,9 @@ const Navbar = () => {
           </div>
 
           {/* Auth Links */}
+          <Link to="/admin-dashboard" className="text-gray-700 hover:text-[#e44d30] font-medium">
+            Admin
+          </Link>
           <Link to="/login" className="text-[#e44d30] hover:underline">
             Log In
           </Link>
