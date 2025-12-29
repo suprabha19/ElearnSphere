@@ -36,7 +36,7 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(user));
 
       // Check instructor status if applicable
-      if (role === "INSTRUCTOR" && instructorStatus !== "APPROVED") {
+      if (role === "INSTRUCTOR" && user.instructorStatus !== "APPROVED") {
         setError("Your instructor account is pending admin approval");
         setIsLoading(false);
         return;
