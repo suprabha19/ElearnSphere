@@ -79,14 +79,14 @@ ElearnSphere follows a **3-tier architecture**:
 ### Step 1: API Configuration
 ```javascript
 // File: /src/config/api.js
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export default API_BASE_URL;
 ```
-**What this does**: Sets the base URL where the backend server is running.
+**What this does**: Sets the base URL where the backend server is running. It first checks for a VITE_API_URL environment variable, and falls back to localhost:5000 if not set. This allows for different configurations in development and production.
 
 ### Step 2: Making an API Request (Login Example)
 ```javascript
-// File: /src/pages/Login.jsx (lines 27-30)
+// File: /src/pages/Login.jsx
 
 // 1. User clicks "Login" button
 // 2. handleSubmit function is called
@@ -156,7 +156,7 @@ const response = await axios.get(
 
 ### Step 1: Database Connection
 ```javascript
-// File: /BACKEND/elearnsphere/index.js (lines 165-171)
+// File: /BACKEND/elearnsphere/index.js
 
 import mongoose from "mongoose";
 
@@ -167,6 +167,7 @@ mongoose
   .connect(MONGOURL)
   .then(() => {
     console.log("✅ Database connected");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((error) => console.error("❌ MongoDB error:", error));
 ```
@@ -220,26 +221,38 @@ export default Course;
 
 #### Create (Add new course)
 ```javascript
-// File: /BACKEND/elearnsphere/src/controllers/courseController.js (lines 7-36)
+// File: /BACKEND/elearnsphere/src/controllers/courseController.js
 
 export const addCourse = async (req, res) => {
   try {
     // 1. Extract data from request body
-    const { title, description, category } = req.body;
+    const { title, description, category, popularity } = req.body;
     
-    // 2. Create new course document
+    // 2. Validate required fields
+    if (!title || !description || !category) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    
+    // 3. Create new course document
     const course = await Course.create({
       title,
       description,
       category,
+      image: req.file ? `/uploads/images/${req.file.filename}` : null,
       instructor: req.user.id,  // From JWT token
-      image: req.file ? `/uploads/images/${req.file.filename}` : null
+      popularity
     });
     
-    // 3. Save to database (automatically done by create())
-    // MongoDB assigns a unique _id to the document
+    // 4. Add activity log entry
+    course.activities.push({
+      message: `Course created: ${title}`,
+      timestamp: Date.now(),
+    });
     
-    // 4. Send response back to frontend
+    // 5. Save course with activities
+    await course.save();
+    
+    // 6. Send response back to frontend
     res.status(201).json(course);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -249,7 +262,7 @@ export const addCourse = async (req, res) => {
 
 #### Read (Get all courses)
 ```javascript
-// File: /BACKEND/elearnsphere/src/controllers/courseController.js (lines 41-62)
+// File: /BACKEND/elearnsphere/src/controllers/courseController.js
 
 export const getCourses = async (req, res) => {
   try {
@@ -297,7 +310,7 @@ db.courses.find({
 
 #### Update (Modify course)
 ```javascript
-// File: /BACKEND/elearnsphere/src/controllers/courseController.js (lines 65-98)
+// File: /BACKEND/elearnsphere/src/controllers/courseController.js
 
 export const updateCourse = async (req, res) => {
   try {
@@ -314,14 +327,26 @@ export const updateCourse = async (req, res) => {
     }
     
     // 3. Update fields
-    const { title, description } = req.body;
+    const { title, description, popularity } = req.body;
     if (title) course.title = title;
     if (description) course.description = description;
+    if (popularity) course.popularity = popularity;
     
-    // 4. Save changes to database
+    // 4. Update image if new one uploaded
+    if (req.file) {
+      course.image = `/uploads/images/${req.file.filename}`;
+    }
+    
+    // 5. Add activity log
+    course.activities.push({
+      message: `Course updated: ${course.title}`,
+      timestamp: Date.now(),
+    });
+    
+    // 6. Save changes to database
     const updatedCourse = await course.save();
     
-    // 5. Send updated course back
+    // 7. Send updated course back
     res.json(updatedCourse);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -331,7 +356,7 @@ export const updateCourse = async (req, res) => {
 
 #### Delete (Remove course)
 ```javascript
-// File: /BACKEND/elearnsphere/src/controllers/courseController.js (lines 190-218)
+// File: /BACKEND/elearnsphere/src/controllers/courseController.js
 
 export const deleteCourse = async (req, res) => {
   try {
@@ -441,7 +466,8 @@ const handleSubmit = async (e) => {
   );
 };
 
-// BACKEND: /BACKEND/elearnsphere/index.js (lines 74-100)
+// BACKEND: /BACKEND/elearnsphere/index.js
+
 app.post("/api/auth/signup", async (req, res) => {
   // STEP 2: Extract data from request
   const { fullName, email, password, role } = req.body;
@@ -480,7 +506,8 @@ app.post("/api/auth/signup", async (req, res) => {
 ### Login Process (User Authentication)
 
 ```javascript
-// BACKEND: /BACKEND/elearnsphere/index.js (lines 103-128)
+// BACKEND: /BACKEND/elearnsphere/index.js
+
 app.post("/api/auth/login", async (req, res) => {
   // STEP 1: Extract credentials
   const { email, password } = req.body;
@@ -615,8 +642,8 @@ const handleSubmit = async (e) => {
   );
 };
 
-// 2. BACKEND: Route receives request
-// File: /BACKEND/elearnsphere/src/routes/courseRoutes.js (line 19)
+// BACKEND: Route receives request
+// File: /BACKEND/elearnsphere/src/routes/courseRoutes.js
 
 router.post(
   "/",                                    // Route path
@@ -721,7 +748,7 @@ const handleEnroll = async (courseId) => {
 };
 
 // BACKEND: Enrollment controller
-// File: /BACKEND/elearnsphere/src/controllers/courseController.js (lines 232-269)
+// File: /BACKEND/elearnsphere/src/controllers/courseController.js
 
 export const enrollCourse = async (req, res) => {
   const courseId = req.params.id;
@@ -827,7 +854,7 @@ const handleMaterialUpload = async (file) => {
 };
 
 // BACKEND: Route handling
-// File: /BACKEND/elearnsphere/src/routes/courseRoutes.js (lines 32-38)
+// File: /BACKEND/elearnsphere/src/routes/courseRoutes.js
 
 router.post(
   "/:id/materials",
@@ -838,7 +865,7 @@ router.post(
 );
 
 // CONTROLLER: Process file
-// File: /BACKEND/elearnsphere/src/controllers/courseController.js (lines 101-144)
+// File: /BACKEND/elearnsphere/src/controllers/courseController.js
 
 export const addCourseMaterial = async (req, res) => {
   // STEP 1: Find course
@@ -907,7 +934,7 @@ course.materials = [
 **Serving Files:**
 ```javascript
 // BACKEND: Static file serving
-// File: /BACKEND/elearnsphere/index.js (line 51)
+// File: /BACKEND/elearnsphere/index.js
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
