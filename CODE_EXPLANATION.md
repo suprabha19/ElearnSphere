@@ -238,6 +238,7 @@ export const addCourse = async (req, res) => {
       title,
       description,
       category,
+      // Store relative path for serving via static file middleware
       image: req.file ? `/uploads/images/${req.file.filename}` : null,
       instructor: req.user.id,  // From JWT token
       popularity
@@ -259,6 +260,14 @@ export const addCourse = async (req, res) => {
   }
 };
 ```
+
+**What happens here**:
+1. Request data is extracted and validated
+2. A new course document is created with all the fields
+3. The uploaded image (if any) is referenced as `/uploads/images/filename.jpg`
+4. An activity log is added to track course creation
+5. Everything is saved to MongoDB
+6. The complete course object is sent back to the frontend
 
 #### Read (Get all courses)
 ```javascript
