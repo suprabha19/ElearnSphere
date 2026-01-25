@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { FaStar } from "react-icons/fa";
+import ProgressBar from "../components/ProgressBar";
 
 const AllStudentCourses = () => {
   const [courses, setCourses] = useState([]);
+  const [progressMap, setProgressMap] = useState({});
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -18,7 +20,27 @@ const AllStudentCourses = () => {
         console.error("Failed to fetch courses:", err);
       }
     };
+
+    const fetchProgress = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/progress", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        // Create a map of courseId -> progress
+        const map = {};
+        res.data.progressList.forEach((p) => {
+          map[p.course._id] = p.completionPercentage;
+        });
+        setProgressMap(map);
+      } catch (err) {
+        console.error("Failed to fetch progress:", err);
+      }
+    };
+
     fetchCourses();
+    fetchProgress();
   }, []);
 
   return (
@@ -73,6 +95,13 @@ const AllStudentCourses = () => {
                   <span className="text-sm text-gray-600">
                     {(c.averageRating || 0).toFixed(1)} ({c.totalReviews} {c.totalReviews === 1 ? "review" : "reviews"})
                   </span>
+                </div>
+              )}
+
+              {/* Progress Bar */}
+              {progressMap[c._id] !== undefined && (
+                <div className="mb-3">
+                  <ProgressBar percentage={progressMap[c._id]} showPercentage={true} />
                 </div>
               )}
               
