@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { FaStar } from "react-icons/fa";
 
 const AllStudentCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -52,6 +53,29 @@ const AllStudentCourses = () => {
                   Instructor: <span className="font-medium text-gray-700">{c.instructor.fullName}</span>
                 </p>
               )}
+              
+              {/* Rating Display */}
+              {c.totalReviews > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar
+                        key={star}
+                        size={16}
+                        className={
+                          star <= Math.round(c.averageRating)
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {c.averageRating.toFixed(1)} ({c.totalReviews} {c.totalReviews === 1 ? "review" : "reviews"})
+                  </span>
+                </div>
+              )}
+              
               <p className="text-gray-700 mb-4">{c.description}</p>
 
               <div className="flex flex-wrap gap-4">
