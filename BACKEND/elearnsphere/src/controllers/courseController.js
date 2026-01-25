@@ -1,6 +1,7 @@
 // controllers/courseController.js
 import Course from "../models/Course.js";
 import User from "../models/User.js"; // make sure you created Course model
+import { createNotification, createBulkNotifications } from "./notificationController.js";
 import path from "path";
 import fs from "fs";
 // Add course
@@ -133,6 +134,17 @@ export const addCourseMaterial = async (req, res) => {
 
     await course.save();
 
+    // Notify all enrolled students about new material
+    if (course.students && course.students.length > 0) {
+      await createBulkNotifications(course.students, {
+        type: "NEW_MATERIAL",
+        title: "New Course Material",
+        message: `New material "${material.title}" added to ${course.title}`,
+        relatedCourse: course._id,
+        link: `/courses/${course._id}`,
+      });
+    }
+
     res.status(201).json({
       message: "Material added successfully",
       material: course.materials[course.materials.length - 1],
@@ -260,6 +272,15 @@ export const enrollCourse = async (req, res) => {
 
       await user.save();
       await course.save();
+
+    // Create notification for the student
+    await createNotification(userId, {
+      type: "COURSE_ENROLLED",
+      title: "Successfully Enrolled",
+      message: `You have successfully enrolled in ${course.title}`,
+      relatedCourse: courseId,
+      link: `/courses/${courseId}`,
+    });
 
     res.status(200).json({ message: "Enrolled successfully", courseId });
   } catch (error) {
