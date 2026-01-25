@@ -1,6 +1,7 @@
 import express from "express";
 import { addCourse, getCourses, updateCourse, deleteCourse, addCourseMaterial, getCourseMaterials, deleteCourseMaterial, getAllCourses } from "../controllers/courseController.js";
 import { enrollCourse, searchCourses, getInstructorDashboard, getStudentDashboard } from "../controllers/courseController.js";
+import { addReview, getReviews, updateReview, deleteReview } from "../controllers/courseController.js";
 import { protect, authorize } from "../middleware/authMiddleware.js";
 import { uploadImage, uploadMaterial } from "../middleware/multerConfig.js";
 import Course from "../models/Course.js";
@@ -46,6 +47,12 @@ router.delete("/:id", protect, authorize("INSTRUCTOR", "ADMIN"), deleteCourse);
 
 //add enroll route
 router.post("/:id/enroll", protect, enrollCourse);
+
+// Review routes
+router.post("/:id/reviews", protect, addReview); // Add a review
+router.get("/:id/reviews", protect, getReviews); // Get all reviews for a course
+router.put("/:courseId/reviews/:reviewId", protect, updateReview); // Update a review
+router.delete("/:courseId/reviews/:reviewId", protect, deleteReview); // Delete a review
 
 // src/routes/courseRoutes.js
 router.get("/:id", protect, async (req, res) => {
