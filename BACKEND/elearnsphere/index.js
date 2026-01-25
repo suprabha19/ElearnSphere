@@ -15,6 +15,7 @@ import recommendRoutes from "./src/routes/recommend.js";
 import quizRoutes from "./src/routes/quizRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
+import progressRoutes from "./src/routes/progressRoutes.js";
 
 const app = express();
 dotenv.config();
@@ -45,6 +46,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/progress", progressRoutes);
 
 // Allow serving files in /uploads
 const __filename = fileURLToPath(import.meta.url);
