@@ -244,3 +244,224 @@ export const resetCourseProgress = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Update video watch progress
+export const updateVideoProgress = async (req, res) => {
+  try {
+    const { courseId, materialId } = req.params;
+    const { currentTime, duration, watchedSegments } = req.body;
+    const studentId = req.user.id;
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Find material and verify it's a video
+    const material = course.materials.find(m => m._id.toString() === materialId);
+    if (!material) {
+      return res.status(404).json({ message: "Material not found" });
+    }
+
+    let progress = await Progress.findOne({
+      student: studentId,
+      course: courseId,
+    });
+
+    if (!progress) {
+      progress = await Progress.create({
+        student: studentId,
+        course: courseId,
+        totalMaterials: course.materials.length,
+        completedMaterials: [],
+        videoWatchProgress: [],
+      });
+    }
+
+    // Update or create video watch progress
+    const videoProgressIndex = progress.videoWatchProgress.findIndex(
+      vp => vp.materialId.toString() === materialId
+    );
+
+    const videoData = {
+      materialId,
+      currentTime: currentTime || 0,
+      duration: duration || 0,
+      watchedSegments: watchedSegments || [],
+      lastWatchedAt: new Date(),
+    };
+
+    if (videoProgressIndex >= 0) {
+      progress.videoWatchProgress[videoProgressIndex] = videoData;
+    } else {
+      progress.videoWatchProgress.push(videoData);
+    }
+
+    progress.lastAccessedAt = new Date();
+    await progress.save();
+
+    res.json({
+      message: "Video progress updated",
+      videoProgress: videoData,
+    });
+  } catch (error) {
+    console.error("Update video progress error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Mark video as fully watched (requires 95% completion)
+export const markVideoComplete = async (req, res) => {
+  try {
+    const { courseId, materialId } = req.params;
+    const { watchTime, totalDuration } = req.body;
+    const studentId = req.user.id;
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Verify material exists and get its index
+    const materialIndex = course.materials.findIndex(
+      m => m._id.toString() === materialId
+    );
+
+    if (materialIndex === -1) {
+      return res.status(404).json({ message: "Material not found" });
+    }
+
+    let progress = await Progress.findOne({
+      student: studentId,
+      course: courseId,
+    });
+
+    if (!progress) {
+      progress = await Progress.create({
+        student: studentId,
+        course: courseId,
+        totalMaterials: course.materials.length,
+        completedMaterials: [],
+      });
+    }
+
+    // Check if material is unlocked (sequential access)
+    const isUnlocked = progress.isMaterialUnlocked(materialIndex, course.materials);
+    if (!isUnlocked) {
+      return res.status(403).json({
+        message: "This material is locked. Complete previous materials first.",
+        materialIndex,
+      });
+    }
+
+    // Validate watch time (must watch at least 95% for videos)
+    const material = course.materials[materialIndex];
+    if (material.type === "video") {
+      const watchPercentage = (watchTime / totalDuration) * 100;
+      if (watchPercentage < 95) {
+        return res.status(400).json({
+          message: "Video must be watched at least 95% to mark as complete",
+          watchPercentage: Math.round(watchPercentage),
+          required: 95,
+        });
+      }
+    }
+
+    // Check if already completed
+    const alreadyCompleted = progress.completedMaterials.some(
+      m => m.materialId.toString() === materialId
+    );
+
+    if (!alreadyCompleted) {
+      progress.completedMaterials.push({
+        materialId,
+        completedAt: new Date(),
+        watchTime: watchTime || 0,
+        totalDuration: totalDuration || 0,
+        fullyWatched: true,
+      });
+    } else {
+      // Update existing completion
+      const index = progress.completedMaterials.findIndex(
+        m => m.materialId.toString() === materialId
+      );
+      progress.completedMaterials[index].fullyWatched = true;
+      progress.completedMaterials[index].watchTime = watchTime || 0;
+      progress.completedMaterials[index].totalDuration = totalDuration || 0;
+    }
+
+    progress.lastAccessedAt = new Date();
+    progress.calculateProgress();
+    await progress.save();
+
+    // Auto-generate certificate if 100% complete
+    if (progress.completionPercentage === 100) {
+      const { autoGenerateCertificate } = await import("./certificateController.js");
+      await autoGenerateCertificate(studentId, courseId);
+    }
+
+    res.json({
+      message: "Material marked as complete",
+      progress,
+      completionPercentage: progress.completionPercentage,
+      certificateEligible: progress.completionPercentage === 100,
+    });
+  } catch (error) {
+    console.error("Mark video complete error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get unlocked materials for sequential access
+export const getUnlockedMaterials = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const studentId = req.user.id;
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    let progress = await Progress.findOne({
+      student: studentId,
+      course: courseId,
+    });
+
+    if (!progress) {
+      progress = await Progress.create({
+        student: studentId,
+        course: courseId,
+        totalMaterials: course.materials.length,
+        completedMaterials: [],
+      });
+    }
+
+    // Determine which materials are unlocked
+    const materialsWithStatus = course.materials.map((material, index) => {
+      const isUnlocked = progress.isMaterialUnlocked(index, course.materials);
+      const isCompleted = progress.completedMaterials.some(
+        m => m.materialId.toString() === material._id.toString()
+      );
+      const videoProgress = progress.videoWatchProgress.find(
+        vp => vp.materialId.toString() === material._id.toString()
+      );
+
+      return {
+        ...material.toObject(),
+        index,
+        isUnlocked,
+        isCompleted,
+        videoProgress: videoProgress || null,
+      };
+    });
+
+    res.json({
+      materials: materialsWithStatus,
+      nextUnlockedIndex: progress.getNextUnlockedMaterialIndex(course.materials),
+    });
+  } catch (error) {
+    console.error("Get unlocked materials error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
