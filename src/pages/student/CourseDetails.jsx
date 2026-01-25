@@ -2,6 +2,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import ReviewForm from "../../components/ReviewForm";
+import ReviewList from "../../components/ReviewList";
+
+// Helper function to get current user
+const getCurrentUser = () => {
+  const userStr = localStorage.getItem("user");
+  return userStr ? JSON.parse(userStr) : null;
+};
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -10,6 +18,12 @@ const CourseDetails = () => {
   const [loading, setLoading] = useState(true);
   const [enrolled, setEnrolled] = useState(false);
   const [showMaterials, setShowMaterials] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [userReview, setUserReview] = useState(null);
+  const [editingReview, setEditingReview] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -17,12 +31,21 @@ const CourseDetails = () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
 
+        // Get user info
+        const user = getCurrentUser();
+        if (user) {
+          setCurrentUserId(user.id);
+        }
+
         const res = await axios.get(`http://localhost:5000/api/courses/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         setCourse(res.data.course);
         setEnrolled(res.data.isEnrolled || false);
+
+        // Fetch reviews
+        fetchReviews();
       } catch (err) {
         console.error("Failed to fetch course:", err);
       } finally {
@@ -32,6 +55,30 @@ const CourseDetails = () => {
 
     fetchCourse();
   }, [id]);
+
+  const fetchReviews = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `http://localhost:5000/api/courses/${id}/reviews`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setReviews(res.data.reviews || []);
+      setAverageRating(res.data.averageRating || 0);
+      setTotalReviews(res.data.totalReviews || 0);
+
+      // Check if current user has already reviewed
+      const user = getCurrentUser();
+      if (user) {
+        const existing = res.data.reviews.find(
+          (r) => r.user?._id === user.id
+        );
+        setUserReview(existing || null);
+      }
+    } catch (err) {
+      console.error("Failed to fetch reviews:", err);
+    }
+  };
 
   const handleEnroll = async () => {
     try {
@@ -61,6 +108,62 @@ const CourseDetails = () => {
     } catch (err) {
       console.error("Failed to fetch materials:", err);
     }
+  };
+
+  const handleSubmitReview = async (reviewData) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `http://localhost:5000/api/courses/${id}/reviews`,
+        reviewData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Review submitted successfully!");
+      fetchReviews();
+    } catch (err) {
+      console.error("Failed to submit review:", err);
+      alert(err.response?.data?.message || "Failed to submit review");
+    }
+  };
+
+  const handleUpdateReview = async (reviewData) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/courses/${id}/reviews/${userReview._id}`,
+        reviewData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Review updated successfully!");
+      setEditingReview(false);
+      fetchReviews();
+    } catch (err) {
+      console.error("Failed to update review:", err);
+      alert(err.response?.data?.message || "Failed to update review");
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm("Are you sure you want to delete this review?")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(
+        `http://localhost:5000/api/courses/${id}/reviews/${reviewId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Review deleted successfully!");
+      fetchReviews();
+    } catch (err) {
+      console.error("Failed to delete review:", err);
+      alert(err.response?.data?.message || "Failed to delete review");
+    }
+  };
+
+  const handleEditReview = (review) => {
+    setEditingReview(true);
   };
 
   if (loading) return <p className="text-center mt-10">Loading course...</p>;
@@ -167,6 +270,32 @@ const CourseDetails = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Reviews Section */}
+      {enrolled && (
+        <div className="mt-12">
+          {/* Show review form only if user hasn't reviewed or is editing */}
+          {(!userReview || editingReview) && (
+            <div className="mb-8">
+              <ReviewForm
+                onSubmit={editingReview ? handleUpdateReview : handleSubmitReview}
+                existingReview={editingReview ? userReview : null}
+                onCancel={editingReview ? () => setEditingReview(false) : null}
+              />
+            </div>
+          )}
+
+          {/* Reviews List */}
+          <ReviewList
+            reviews={reviews}
+            currentUserId={currentUserId}
+            onEdit={handleEditReview}
+            onDelete={handleDeleteReview}
+            averageRating={averageRating}
+            totalReviews={totalReviews}
+          />
         </div>
       )}
     </div>

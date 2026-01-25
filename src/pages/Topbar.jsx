@@ -1,4 +1,5 @@
-import { FaShoppingCart, FaGlobe, FaBell, FaSearch } from "react-icons/fa";
+import { FaShoppingCart, FaGlobe, FaSearch } from "react-icons/fa";
+import NotificationBell from "../components/NotificationBell";
 
 const Topbar = () => {
   return (
@@ -45,12 +46,7 @@ const Topbar = () => {
         </div>
 
         {/* Notifications */}
-        <div className="relative">
-          <FaBell size={18} className="text-gray-700" />
-          <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-            1
-          </span>
-        </div>
+        <NotificationBell />
 
         {/* Profile */}
         <div className="bg-orange-500 text-white w-8 h-8 flex items-center justify-center rounded-full font-semibold">

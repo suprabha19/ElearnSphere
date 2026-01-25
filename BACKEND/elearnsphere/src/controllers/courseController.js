@@ -1,6 +1,7 @@
 // controllers/courseController.js
 import Course from "../models/Course.js";
 import User from "../models/User.js"; // make sure you created Course model
+import { createNotification, createBulkNotifications } from "./notificationController.js";
 import path from "path";
 import fs from "fs";
 // Add course
@@ -133,6 +134,17 @@ export const addCourseMaterial = async (req, res) => {
 
     await course.save();
 
+    // Notify all enrolled students about new material
+    if (course.students && course.students.length > 0) {
+      await createBulkNotifications(course.students, {
+        type: "NEW_MATERIAL",
+        title: "New Course Material",
+        message: `New material "${material.title}" added to ${course.title}`,
+        relatedCourse: course._id,
+        link: `/courses/${course._id}`,
+      });
+    }
+
     res.status(201).json({
       message: "Material added successfully",
       material: course.materials[course.materials.length - 1],
@@ -260,6 +272,15 @@ export const enrollCourse = async (req, res) => {
 
       await user.save();
       await course.save();
+
+    // Create notification for the student
+    await createNotification(userId, {
+      type: "COURSE_ENROLLED",
+      title: "Successfully Enrolled",
+      message: `You have successfully enrolled in ${course.title}`,
+      relatedCourse: courseId,
+      link: `/courses/${courseId}`,
+    });
 
     res.status(200).json({ message: "Enrolled successfully", courseId });
   } catch (error) {
@@ -460,6 +481,201 @@ export const getStudentDashboard = async (req, res) => {
     });
   } catch (error) {
     console.error("Student dashboard error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Add review to a course
+export const addReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const courseId = req.params.id;
+    const userId = req.user.id;
+
+    // Validate input
+    if (!rating || !comment) {
+      return res.status(400).json({ message: "Rating and comment are required" });
+    }
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+
+    // Find course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Check if user is enrolled in the course
+    const user = await User.findById(userId);
+    if (!user.enrolledCourses.some(id => id.toString() === courseId)) {
+      return res.status(403).json({ message: "You must be enrolled to review this course" });
+    }
+
+    // Check if user already reviewed this course
+    const existingReview = course.reviews.find(
+      (review) => review.user.toString() === userId
+    );
+
+    if (existingReview) {
+      return res.status(400).json({ message: "You have already reviewed this course" });
+    }
+
+    // Add review
+    course.reviews.push({
+      user: userId,
+      rating,
+      comment,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    // Calculate new average rating
+    const totalRating = course.reviews.reduce((sum, review) => sum + review.rating, 0);
+    course.averageRating = totalRating / course.reviews.length;
+    course.totalReviews = course.reviews.length;
+
+    // Add activity
+    course.activities.push({
+      message: `New review added by ${user.fullName}`,
+      timestamp: Date.now(),
+    });
+
+    await course.save();
+
+    res.status(201).json({
+      message: "Review added successfully",
+      review: course.reviews[course.reviews.length - 1],
+      averageRating: course.averageRating,
+      totalReviews: course.totalReviews,
+    });
+  } catch (error) {
+    console.error("Add review error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all reviews for a course
+export const getReviews = async (req, res) => {
+  try {
+    const courseId = req.params.id;
+
+    const course = await Course.findById(courseId)
+      .populate("reviews.user", "fullName email")
+      .select("reviews averageRating totalReviews");
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    res.json({
+      reviews: course.reviews,
+      averageRating: course.averageRating,
+      totalReviews: course.totalReviews,
+    });
+  } catch (error) {
+    console.error("Get reviews error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update a review
+export const updateReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const { courseId, reviewId } = req.params;
+    const userId = req.user.id;
+
+    // Validate input
+    if (rating && (rating < 1 || rating > 5)) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+
+    // Find course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Find review
+    const review = course.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    // Check if user owns the review
+    if (review.user.toString() !== userId) {
+      return res.status(403).json({ message: "You can only edit your own review" });
+    }
+
+    // Update review
+    if (rating) review.rating = rating;
+    if (comment) review.comment = comment;
+    review.updatedAt = new Date();
+
+    // Recalculate average rating
+    const totalRating = course.reviews.reduce((sum, r) => sum + r.rating, 0);
+    course.averageRating = totalRating / course.reviews.length;
+
+    await course.save();
+
+    res.json({
+      message: "Review updated successfully",
+      review,
+      averageRating: course.averageRating,
+    });
+  } catch (error) {
+    console.error("Update review error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete a review
+export const deleteReview = async (req, res) => {
+  try {
+    const { courseId, reviewId } = req.params;
+    const userId = req.user.id;
+
+    // Find course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Find review
+    const review = course.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    // Check if user owns the review or is admin
+    if (review.user.toString() !== userId && req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Not authorized to delete this review" });
+    }
+
+    // Remove review
+    course.reviews.pull(reviewId);
+
+    // Recalculate average rating
+    if (course.reviews.length > 0) {
+      const totalRating = course.reviews.reduce((sum, r) => sum + r.rating, 0);
+      course.averageRating = totalRating / course.reviews.length;
+      course.totalReviews = course.reviews.length;
+    } else {
+      course.averageRating = 0;
+      course.totalReviews = 0;
+    }
+
+    await course.save();
+
+    res.json({
+      message: "Review deleted successfully",
+      averageRating: course.averageRating,
+      totalReviews: course.totalReviews,
+    });
+  } catch (error) {
+    console.error("Delete review error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

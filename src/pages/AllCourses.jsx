@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { FaStar } from "react-icons/fa";
+import ProgressBar from "../components/ProgressBar";
 
 const AllStudentCourses = () => {
   const [courses, setCourses] = useState([]);
+  const [progressMap, setProgressMap] = useState({});
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -17,7 +20,27 @@ const AllStudentCourses = () => {
         console.error("Failed to fetch courses:", err);
       }
     };
+
+    const fetchProgress = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/progress", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        // Create a map of courseId -> progress
+        const map = {};
+        res.data.progressList.forEach((p) => {
+          map[p.course._id] = p.completionPercentage;
+        });
+        setProgressMap(map);
+      } catch (err) {
+        console.error("Failed to fetch progress:", err);
+      }
+    };
+
     fetchCourses();
+    fetchProgress();
   }, []);
 
   return (
@@ -52,6 +75,36 @@ const AllStudentCourses = () => {
                   Instructor: <span className="font-medium text-gray-700">{c.instructor.fullName}</span>
                 </p>
               )}
+              
+              {/* Rating Display */}
+              {c.totalReviews > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar
+                        key={star}
+                        size={16}
+                        className={
+                          star <= Math.round(c.averageRating || 0)
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    {(c.averageRating || 0).toFixed(1)} ({c.totalReviews} {c.totalReviews === 1 ? "review" : "reviews"})
+                  </span>
+                </div>
+              )}
+
+              {/* Progress Bar */}
+              {progressMap[c._id] !== undefined && (
+                <div className="mb-3">
+                  <ProgressBar percentage={progressMap[c._id]} showPercentage={true} />
+                </div>
+              )}
+              
               <p className="text-gray-700 mb-4">{c.description}</p>
 
               <div className="flex flex-wrap gap-4">
