@@ -5,6 +5,12 @@ import axios from "axios";
 import ReviewForm from "../../components/ReviewForm";
 import ReviewList from "../../components/ReviewList";
 
+// Helper function to get current user
+const getCurrentUser = () => {
+  const userStr = localStorage.getItem("user");
+  return userStr ? JSON.parse(userStr) : null;
+};
+
 const CourseDetails = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
@@ -26,9 +32,8 @@ const CourseDetails = () => {
         if (!token) throw new Error("No token found");
 
         // Get user info
-        const userStr = localStorage.getItem("user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
+        const user = getCurrentUser();
+        if (user) {
           setCurrentUserId(user.id);
         }
 
@@ -63,9 +68,8 @@ const CourseDetails = () => {
       setTotalReviews(res.data.totalReviews || 0);
 
       // Check if current user has already reviewed
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
+      const user = getCurrentUser();
+      if (user) {
         const existing = res.data.reviews.find(
           (r) => r.user?._id === user.id
         );

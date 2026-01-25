@@ -488,7 +488,7 @@ export const addReview = async (req, res) => {
 
     // Check if user is enrolled in the course
     const user = await User.findById(userId);
-    if (!user.enrolledCourses.includes(courseId)) {
+    if (!user.enrolledCourses.some(id => id.toString() === courseId)) {
       return res.status(403).json({ message: "You must be enrolled to review this course" });
     }
 

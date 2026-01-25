@@ -63,7 +63,7 @@ const AllStudentCourses = () => {
                         key={star}
                         size={16}
                         className={
-                          star <= Math.round(c.averageRating)
+                          star <= Math.round(c.averageRating || 0)
                             ? "text-yellow-400"
                             : "text-gray-300"
                         }
@@ -71,7 +71,7 @@ const AllStudentCourses = () => {
                     ))}
                   </div>
                   <span className="text-sm text-gray-600">
-                    {c.averageRating.toFixed(1)} ({c.totalReviews} {c.totalReviews === 1 ? "review" : "reviews"})
+                    {(c.averageRating || 0).toFixed(1)} ({c.totalReviews} {c.totalReviews === 1 ? "review" : "reviews"})
                   </span>
                 </div>
               )}
