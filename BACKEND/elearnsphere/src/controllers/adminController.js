@@ -3,7 +3,9 @@ import Course from "../models/Course.js";
 import Quiz from "../models/Quiz.js";
 import Enrollment from "../models/Enrollment.js";
 
-// Get platform statistics
+// ===============================
+// GET PLATFORM STATISTICS
+// ===============================
 export const getAdminStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -11,7 +13,18 @@ export const getAdminStats = async (req, res) => {
     const totalInstructors = await User.countDocuments({ role: "INSTRUCTOR" });
     const totalAdmins = await User.countDocuments({ role: "ADMIN" });
     const totalCourses = await Course.countDocuments();
-    const totalEnrollments = await Enrollment.countDocuments();
+
+    // ✅ FIXED: COUNT ENROLLMENTS FROM USER MODEL
+    const students = await User.find(
+      { role: "STUDENT" },
+      { enrolledCourses: 1 }
+    );
+
+    const totalEnrollments = students.reduce(
+      (sum, student) => sum + (student.enrolledCourses?.length || 0),
+      0
+    );
+
     const totalQuizzes = await Quiz.countDocuments();
 
     res.json({
@@ -31,18 +44,21 @@ export const getAdminStats = async (req, res) => {
   }
 };
 
-// Get all users with filtering
+// ===============================
+// GET ALL USERS
+// ===============================
 export const getAllUsers = async (req, res) => {
   try {
     const { role, search } = req.query;
-    
+
     let query = {};
-    if (role) {
-      query.role = role;
-    }
+    if (role) query.role = role;
+
     if (search) {
-      // Sanitize search input to prevent ReDoS
-      const sanitizedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').substring(0, 100);
+      const sanitizedSearch = search
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        .substring(0, 100);
+
       query.$or = [
         { fullName: { $regex: sanitizedSearch, $options: "i" } },
         { email: { $regex: sanitizedSearch, $options: "i" } },
@@ -60,7 +76,9 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Get user by ID
+// ===============================
+// GET USER BY ID
+// ===============================
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
@@ -78,7 +96,9 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// Update user
+// ===============================
+// UPDATE USER
+// ===============================
 export const updateUser = async (req, res) => {
   try {
     const { fullName, email, role, bio, qualifications, experience } = req.body;
@@ -88,7 +108,6 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update fields
     if (fullName) user.fullName = fullName;
     if (email) user.email = email;
     if (role) user.role = role;
@@ -105,17 +124,18 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Delete user
+// ===============================
+// DELETE USER
+// ===============================
 export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Prevent deleting yourself
     if (user._id.toString() === req.user.id) {
-      return res.status(400).json({ message: "Cannot delete your own account" });
+      return res
+        .status(400)
+        .json({ message: "Cannot delete your own account" });
     }
 
     await User.findByIdAndDelete(req.params.id);
@@ -127,18 +147,21 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// Get all courses (admin view)
+// ===============================
+// GET ALL COURSES (ADMIN)
+// ===============================
 export const getAllCoursesAdmin = async (req, res) => {
   try {
     const { category, search } = req.query;
-    
+
     let query = {};
-    if (category) {
-      query.category = category;
-    }
+    if (category) query.category = category;
+
     if (search) {
-      // Sanitize search input to prevent ReDoS
-      const sanitizedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').substring(0, 100);
+      const sanitizedSearch = search
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        .substring(0, 100);
+
       query.$or = [
         { title: { $regex: sanitizedSearch, $options: "i" } },
         { description: { $regex: sanitizedSearch, $options: "i" } },
@@ -156,13 +179,13 @@ export const getAllCoursesAdmin = async (req, res) => {
   }
 };
 
-// Delete any course (admin only)
+// ===============================
+// DELETE COURSE (ADMIN)
+// ===============================
 export const deleteCourseAdmin = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
+    if (!course) return res.status(404).json({ message: "Course not found" });
 
     await Course.findByIdAndDelete(req.params.id);
 
@@ -173,17 +196,17 @@ export const deleteCourseAdmin = async (req, res) => {
   }
 };
 
-// Get recent activities
+// ===============================
+// RECENT ACTIVITIES
+// ===============================
 export const getRecentActivities = async (req, res) => {
   try {
-    // Get recent enrollments
     const recentEnrollments = await Enrollment.find()
       .sort({ enrolledAt: -1 })
       .limit(10)
       .populate("student", "fullName email")
       .populate("course", "title");
 
-    // Get recently created courses
     const recentCourses = await Course.find()
       .sort({ createdAt: -1 })
       .limit(10)
@@ -194,7 +217,9 @@ export const getRecentActivities = async (req, res) => {
     recentEnrollments.forEach((enrollment) => {
       activities.push({
         type: "enrollment",
-        message: `${enrollment.student?.fullName || "Unknown"} enrolled in ${enrollment.course?.title || "Unknown Course"}`,
+        message: `${enrollment.student?.fullName || "Unknown"} enrolled in ${
+          enrollment.course?.title || "Unknown Course"
+        }`,
         timestamp: enrollment.enrolledAt,
       });
     });
@@ -202,13 +227,16 @@ export const getRecentActivities = async (req, res) => {
     recentCourses.forEach((course) => {
       activities.push({
         type: "course",
-        message: `${course.instructor?.fullName || "Unknown"} created course: ${course.title}`,
+        message: `${course.instructor?.fullName || "Unknown"} created course: ${
+          course.title
+        }`,
         timestamp: course.createdAt,
       });
     });
 
-    // Sort by timestamp
-    activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    activities.sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
 
     res.json(activities.slice(0, 15));
   } catch (error) {

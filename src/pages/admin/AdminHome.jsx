@@ -101,7 +101,9 @@ const AdminHome = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">{stat.title}</p>
+                <p className="text-gray-600 text-sm font-medium">
+                  {stat.title}
+                </p>
                 <h2 className="text-3xl font-bold text-gray-800 mt-2">
                   {stat.value}
                 </h2>

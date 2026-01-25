@@ -1,7 +1,15 @@
 // src/pages/admin/AdminSidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, BookOpen, Settings, LogOut, BarChart } from "lucide-react";
+import {
+  Home,
+  Users,
+  BookOpen,
+  Settings,
+  LogOut,
+  BarChart,
+  User,
+} from "lucide-react";
 
 const AdminSidebar = () => {
   const location = useLocation();
@@ -9,9 +17,14 @@ const AdminSidebar = () => {
   const navItems = [
     { name: "Dashboard", path: "home", icon: <Home size={18} /> },
     { name: "User Management", path: "users", icon: <Users size={18} /> },
-    { name: "Course Management", path: "courses", icon: <BookOpen size={18} /> },
+    {
+      name: "Course Management",
+      path: "courses",
+      icon: <BookOpen size={18} />,
+    },
     { name: "Analytics", path: "analytics", icon: <BarChart size={18} /> },
     { name: "Settings", path: "settings", icon: <Settings size={18} /> },
+    { name: "Profile", path: "profile", icon: <User size={18} /> },
   ];
 
   const handleLogout = () => {

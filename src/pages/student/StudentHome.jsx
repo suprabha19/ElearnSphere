@@ -19,7 +19,7 @@ const StudentHome = () => {
         // Student dashboard stats + activities
         const res = await axios.get(
           "http://localhost:5000/api/courses/student/dashboard",
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         setStats(res.data.stats);
         setActivities(res.data.activities);
@@ -148,7 +148,10 @@ const StudentHome = () => {
         <ul className="space-y-2">
           {activities.length > 0 ? (
             activities.map((a, i) => (
-              <li key={i} className="border-b pb-2">
+              <li
+                key={i}
+                className="flex gap-3 p-3 bg-gray-50 justify-between items-center pb-2"
+              >
                 <p>{a.message}</p>
                 <span className="text-sm text-gray-500">
                   {new Date(a.timestamp).toLocaleString()}

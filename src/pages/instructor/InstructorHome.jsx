@@ -25,14 +25,14 @@ const InstructorHome = () => {
           "http://localhost:5000/api/courses/dashboard",
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         setStats(
           res.data.stats || {
             totalCourses: 0,
             totalStudents: 0,
             totalMaterials: 0,
-          }
+          },
         );
         setActivities(res.data.activities || []);
       } catch (err) {
@@ -141,7 +141,7 @@ const InstructorHome = () => {
               {activities.map((act, idx) => (
                 <li
                   key={idx}
-                  className="flex justify-between items-center border-b pb-2"
+                  className="flex gap-3 p-3 bg-gray-50 justify-between items-center pb-2"
                 >
                   <span>{act.message}</span>
                   <span className="text-gray-500 text-sm">
